@@ -1,0 +1,261 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GoalMine</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span class="sidebar-title">My Goals</span>
+    <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+  </div>
+  <div class="sidebar-list">
+    {% if all_goals %}
+      {% for g in all_goals %}
+      <div class="sidebar-goal {% if g.id == saved_goal_id %}active{% endif %}">
+        <div class="sidebar-goal-text" onclick="loadGoal({{ g.id }})">{{ g.goal_text }}</div>
+        <div class="sidebar-goal-bottom">
+          <div class="sidebar-goal-meta">
+            {{ g.completed_steps }}/{{ g.total_steps }} steps
+            <div class="sidebar-progress">
+              <div class="sidebar-progress-fill" style="width: {% if g.total_steps > 0 %}{{ (g.completed_steps / g.total_steps * 100)|int }}{% else %}0{% endif %}%"></div>
+            </div>
+          </div>
+          <form method="POST" action="/delete_goal/{{ g.id }}" onsubmit="return confirm('Delete this goal?')">
+            <button type="submit" class="sidebar-delete">✕</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="sidebar-empty">No goals yet. Mine your first one!</p>
+    {% endif %}
+  </div>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+{% endif %}
+
+<nav>
+  <a href="/" class="logo">Goal<span>Mine</span></a>
+  <div class="nav-right">
+    <div class="coin-display">🪙 <span id="coin-count">{{ coins }}</span> GoalCoins</div>
+    {% if current_user.is_authenticated %}
+      <button class="btn-nav" onclick="openSidebar()">My Goals</button>
+      <span style="font-size:14px; color: rgba(245,237,224,0.5);">Hi, {{ current_user.name }}</span>
+      <a href="/logout" class="btn-nav">Log Out</a>
+    {% else %}
+      <a href="/login" class="btn-nav">Log In</a>
+      <a href="/signup" class="btn-nav">Sign Up</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="affirmation-bar">
+  <span class="affirmation-icon">✦</span>
+  <span class="affirmation-text">{{ affirmation }}</span>
+  <span class="affirmation-icon">✦</span>
+</div>
+
+<div class="how-modal" id="how-modal">
+  <div class="how-modal-box">
+    <button class="how-modal-close" onclick="closeModal()">✕</button>
+    <h2 class="how-modal-title">How GoalMine Works</h2>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">1</div>
+        <div>
+          <div class="how-step-title">Enter your goal</div>
+          <div class="how-step-desc">Type any goal — big or small. Career, health, personal, creative. GoalMine handles all of it.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">2</div>
+        <div>
+          <div class="how-step-title">Pick your pace</div>
+          <div class="how-step-desc">Choose Quick (1-2 weeks), Standard (4 weeks), or Deep (6-8 weeks) depending on how big your goal is.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">3</div>
+        <div>
+          <div class="how-step-title">Get your action plan</div>
+          <div class="how-step-desc">GoalMine's AI breaks your goal into clear, weekly action steps so you always know what to do next.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">4</div>
+        <div>
+          <div class="how-step-title">Check off steps, earn coins</div>
+          <div class="how-step-desc">Every step you complete earns GoalCoins. Creating a plan earns +10, each step earns +5.</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-gold" onclick="closeModal()" style="width:100%; margin-top:1.5rem;">Let's Mine It 🪙</button>
+  </div>
+</div>
+<div class="how-overlay" id="how-overlay" onclick="closeModal()"></div>
+
+<main>
+  <div class="hero">
+    <h1>What's your <em>big goal?</em></h1>
+    <button class="how-btn" onclick="openModal()">How does GoalMine work?</button>
+  </div>
+
+  <form method="POST" class="goal-form">
+    <div class="pace-picker">
+      <label class="pace-option">
+        <input type="radio" name="pace" value="quick" {% if pace == 'quick' %}checked{% endif %}>
+        <span>
+          <strong>Quick</strong>
+          <small>1-2 weeks</small>
+        </span>
+      </label>
+      <label class="pace-option">
+        <input type="radio" name="pace" value="standard" checked {% if pace == 'standard' %}checked{% endif %}>
+        <span>
+          <strong>Standard</strong>
+          <small>4 weeks</small>
+        </span>
+      </label>
+      <label class="pace-option">
+        <input type="radio" name="pace" value="deep" {% if pace == 'deep' %}checked{% endif %}>
+        <span>
+          <strong>Deep</strong>
+          <small>6-8 weeks</small>
+        </span>
+      </label>
+    </div>
+    <div class="input-row">
+      <input
+        type="text"
+        name="goal"
+        placeholder="e.g. learn to cook, start a business, get a certification..."
+        value="{{ goal }}"
+        required
+        autocomplete="off"
+      />
+      <button type="submit">Mine It 🪙</button>
+    </div>
+  </form>
+
+  {% if error %}
+  <div class="error-box">{{ error }}</div>
+  {% endif %}
+
+{% if steps_data %}
+<div class="plan-box">
+  <div class="plan-header">
+    <div class="plan-title">Your GoalMine Plan</div>
+    <div class="plan-goal">"{{ goal }}"</div>
+  </div>
+  <div class="plan-content" id="plan-text">
+    {% set current_week = namespace(val=0) %}
+    {% for step in steps_data %}
+      {% if step.week_number != current_week.val %}
+        {% set current_week.val = step.week_number %}
+        <div class="week-label">Milestone {{ step.week_number }}</div>
+      {% endif %}
+      <div class="step">
+        <input type="checkbox" class="step-check" {% if step.is_completed %}checked{% endif %} onchange="handleCheck(this, {{ step.id }})"/>
+        • {{ step.step_text }}
+      </div>
+    {% endfor %}
+  </div>
+  <div class="plan-actions">
+    <button onclick="copyPlan()" class="btn-secondary">Copy Plan</button>
+    <button onclick="downloadPlan()" class="btn-secondary">Download Plan</button>
+  </div>
+  <div class="coin-earned" id="coin-msg">🪙 Keep checking off steps to earn GoalCoins!</div>
+</div>
+{% endif %} 
+
+</main>
+
+<footer>
+  <p>GoalMine — Your goals are worth mining. &nbsp;✦&nbsp; Built by Trinity Atabansi</p>
+</footer>
+
+<script>
+  let coins = {{ coins }};
+  document.getElementById('coin-count').textContent = coins;
+
+  function handleCheck(checkbox, stepId) {
+    const completed = checkbox.checked;
+    {% if current_user.is_authenticated %}
+    if (stepId) {
+      fetch('/toggle_step', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ step_id: stepId, completed: completed })
+      })
+      .then(r => r.json())
+      .then(data => {
+        coins = data.coins;
+        document.getElementById('coin-count').textContent = coins;
+        if (completed) {
+          document.getElementById('coin-msg').textContent = '🪙 +5 GoalCoins earned for completing a step!';
+        }
+      });
+    }
+    {% else %}
+    if (completed) {
+      coins += 5;
+      document.getElementById('coin-count').textContent = coins;
+      document.getElementById('coin-msg').textContent = '🪙 +5 GoalCoins! Log in to save your progress.';
+    }
+    {% endif %}
+  }
+
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebar-overlay').classList.add('open');
+  }
+
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+  }
+
+  function loadGoal(goalId) {
+    window.location.href = '/load_goal/' + goalId;
+  }
+
+  function openModal() {
+    document.getElementById('how-modal').classList.add('open');
+    document.getElementById('how-overlay').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('how-modal').classList.remove('open');
+    document.getElementById('how-overlay').classList.remove('open');
+  }
+
+  function copyPlan() {
+    const lines = document.querySelectorAll('.week-label, .step');
+    let text = "My GoalMine Plan: {{ goal }}\n\n";
+    lines.forEach(l => text += l.textContent.trim() + "\n");
+    navigator.clipboard.writeText(text);
+    alert("Plan copied to clipboard!");
+  }
+
+  function downloadPlan() {
+    const lines = document.querySelectorAll('.week-label, .step');
+    let text = "MY GOALMINE PLAN\nGoal: {{ goal }}\n\n";
+    lines.forEach(l => text += l.textContent.trim() + "\n");
+    const blob = new Blob([text], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "goalmine_plan.txt";
+    a.click();
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — GoalMine</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">Goal<span>Mine</span></a>
+    <div class="nav-right">
+      <a href="/signup" class="btn-nav">Create Account</a>
+    </div>
+  </nav>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-sub">Log in to access your saved plans and GoalCoins.</p>
+
+      {% if error %}
+      <div class="error-box">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" class="auth-form">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="you@email.com" required/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="••••••••" required/>
+        </div>
+        <button type="submit" class="btn-gold">Log In</button>
+      </form>
+
+      <p class="auth-switch">Don't have an account? <a href="/signup">Sign up</a></p>
+      <p class="auth-switch"><a href="/">Continue as guest →</a></p>
+    </div>
+  </main>
+</body>
+</html>
