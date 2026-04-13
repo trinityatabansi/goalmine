@@ -10,7 +10,7 @@ def get_connection():
         user=os.getenv("DB_USER", "root"),
         password=os.getenv("DB_PASSWORD", ""),
         database=os.getenv("DB_NAME", "goalmine"),
-        port=int(os.getenv("DB_PORT", 3306))
+        port=int(os.getenv("DB_PORT") or os.getenv("MYSQLPORT") or 3306)
     )
 
 def init_db():
