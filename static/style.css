@@ -556,7 +556,7 @@ footer {
     padding: 5px 12px;
   }
 
-  nav span {
+  .nav-right span {
     display: none;
   }
 
