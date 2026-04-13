@@ -1,5 +1,4 @@
 ﻿import mysql.connector
-from mysql.connector import Error
 import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse
@@ -7,7 +6,7 @@ from urllib.parse import urlparse
 load_dotenv()
 
 def get_connection():
-    url = os.getenv("MYSQL_URL") or os.getenv("DATABASE_URL")
+    url = os.getenv("DATABASE_URL")
     if url:
         parsed = urlparse(url)
         return mysql.connector.connect(
@@ -28,7 +27,6 @@ def get_connection():
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
-
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,7 +38,6 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS goals (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -50,7 +47,6 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
-
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS steps (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -61,7 +57,6 @@ def init_db():
             FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
         )
     """)
-
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS affirmations (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -69,7 +64,6 @@ def init_db():
             category VARCHAR(50) DEFAULT 'general'
         )
     """)
-
     conn.commit()
     cursor.close()
     conn.close()
