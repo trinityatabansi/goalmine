@@ -1,16 +1,28 @@
 ﻿import mysql.connector
+from mysql.connector import Error
 import os
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 
 load_dotenv()
 
 def get_connection():
+    url = os.getenv("MYSQL_URL") or os.getenv("DATABASE_URL")
+    if url:
+        parsed = urlparse(url)
+        return mysql.connector.connect(
+            host=parsed.hostname,
+            user=parsed.username,
+            password=parsed.password,
+            database=parsed.path.lstrip("/"),
+            port=parsed.port or 3306
+        )
     return mysql.connector.connect(
         host=os.getenv("DB_HOST", "localhost"),
         user=os.getenv("DB_USER", "root"),
         password=os.getenv("DB_PASSWORD", ""),
         database=os.getenv("DB_NAME", "goalmine"),
-        port=int(os.getenv("DB_PORT") or os.getenv("MYSQLPORT") or 3306)
+        port=int(os.getenv("DB_PORT") or 3306)
     )
 
 def init_db():
