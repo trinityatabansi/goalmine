@@ -533,3 +533,56 @@ footer {
   transition: color 0.2s;
 }
 .sidebar-delete:hover { color: #ff8a8a; }
+@media (max-width: 768px) {
+  nav {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .nav-right {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+
+  .coin-display {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  .btn-nav {
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+
+  nav span {
+    display: none;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+
+  .pace-picker {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .input-row {
+    flex-direction: column;
+  }
+
+  .input-row button {
+    width: 100%;
+  }
+
+  .plan-actions {
+    flex-direction: column;
+  }
+
+  .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}
